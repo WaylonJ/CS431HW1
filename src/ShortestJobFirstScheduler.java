@@ -1,3 +1,6 @@
+//Test case 1: Perfect!
+//Test case 2: 5/10, kinda close? 
+
 public class ShortestJobFirstScheduler extends Scheduler
 {
     public ShortestJobFirstScheduler(Processor theCPU)
@@ -12,6 +15,9 @@ public class ShortestJobFirstScheduler extends Scheduler
     {
         // You can call job.timeLeft() to see how much time is left for this job
 
+    	//NOTE: for some reason job 9 has blocks at 10 and 1, instead of 18 and 9 which is what is listed when the job is added.
+    	// I do not understand why this is different, as I assumed blocks were handled in the framework code, as I don't touch them.
+    	
     	
         //*************************************************************************
     	//**************************** BASIC SETUP START **************************
@@ -44,6 +50,7 @@ public class ShortestJobFirstScheduler extends Scheduler
             }
             else if (job.blocked())
             {
+//            	System.out.println("WE'VE BEEN BLOCKEDDDD : );
                 job.enqueueEnd(cpu.blockedQueue);
             }
         }
@@ -57,33 +64,36 @@ public class ShortestJobFirstScheduler extends Scheduler
         //*************************************************************************
         
     	//Make the job with the SHORTEST TIME the current job.
-    	for(jobChecker = cpu.readyQueue.last(); jobChecker != null; jobChecker = cpu.readyQueue.last()) {
-    		if(cpu.currentJob.first() == null) {
-    			job = cpu.readyQueue.first();
-    			job.enqueueStart(cpu.currentJob);
-    		}
-    		
-    		job = cpu.currentJob.first();
-    		
-    		if(job == jobChecker) {
-    			break;
-    		}
-    		
-    		if(jobChecker != null && job != null) {
-//    			System.out.println("job time: " + job.timeLeft() + "    -----   jobChecker time: " + jobChecker.timeLeft());
-	    		if(job.timeLeft() > jobChecker.timeLeft()) {
-	    			job.enqueueEnd(cpu.unblockedQueue);
-	    			jobChecker.enqueueStart(cpu.currentJob);
+        job = cpu.currentJob.first();
+        if(job == null) {
+	    	for(jobChecker = cpu.readyQueue.first(); jobChecker != null; jobChecker = cpu.readyQueue.first()) {
+	    		if(cpu.currentJob.first() == null) {
+	    			job = cpu.readyQueue.first();
+	    			job.enqueueStart(cpu.currentJob);
 	    		}
-	    		else {
-	    			jobChecker.enqueueEnd(cpu.unblockedQueue);
+	    		
+	    		job = cpu.currentJob.first();
+	    		jobChecker = cpu.readyQueue.first();
+	    		if(job == jobChecker) {
+	    			break;
 	    		}
-    		}
-    	}
+	    		
+	    		if(jobChecker != null && job != null) {
+	//    			System.out.println("job time: " + job.timeLeft() + "    -----   jobChecker time: " + jobChecker.timeLeft());
+		    		if(job.timeLeft() > jobChecker.timeLeft()) {
+		    			job.enqueueEnd(cpu.unblockedQueue);
+		    			jobChecker.enqueueStart(cpu.currentJob);
+		    		}
+		    		else {
+		    			jobChecker.enqueueEnd(cpu.unblockedQueue);
+		    		}
+	    		}
+	    	}
+        }
   	
     	job = cpu.currentJob.first();
-    	if(job != null)
-    		System.out.println("Current job id: " + job.id() + ", remaining time: " + job.timeLeft() + ", time: " + cpu.time);
+//    	if(job != null)
+//    		System.out.println("Current job id: " + job.id() + ", remaining time: " + job.timeLeft() + ", time: " + cpu.time);
 //    	job.enqueueStart(cpu.currentJob);
     }
 

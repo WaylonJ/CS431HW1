@@ -1,3 +1,6 @@
+//Test case 1: Perfect!
+//Test case 2: Perfect!
+
 public class RoundRobinScheduler extends Scheduler
 {
     public RoundRobinScheduler(Processor theCPU)
@@ -10,7 +13,48 @@ public class RoundRobinScheduler extends Scheduler
     // This function does the scheduling work!
     public void tick()
     {
-        // TBD
+        Job job;
+        
+        job = cpu.currentJob.first();
+        if (job != null)
+        {
+            if (job.done())
+            {
+                job.enqueueEnd(cpu.doneQueue);
+            }
+            else if (job.blocked())
+            {
+//            	System.out.println("WE'VE BEEN BLOCKEDDDD : );
+                job.enqueueEnd(cpu.blockedQueue);
+            }
+        }
+        
+        //Move all unblocked jobs to the end of the ready Queue
+        for(job = cpu.unblockedQueue.first(); job != null; job = cpu.unblockedQueue.first()) {
+        	job.enqueueEnd(cpu.readyQueue);
+        }
+        
+        // Moves any NEW jobs into READYQUEUE
+        for (job = cpu.newJobQueue.first(); job != null; job = cpu.newJobQueue.first())
+        {
+        	System.out.println(job.timeLeft());
+            job.enqueueEnd(cpu.readyQueue);
+        }
+        
+        //Move current job to end of readyQueue (as a result of quantum 1)
+        job = cpu.currentJob.first();
+        if(job != null)
+        	job.enqueueEnd(cpu.readyQueue);
+        
+        //Move the job at the front of the ready queue to the currentJob queue
+        job = cpu.readyQueue.first();
+        if(job != null) {
+        	job.enqueueStart(cpu.currentJob);
+        }
+        
+    	job = cpu.currentJob.first();
+    	if(job != null)
+    		System.out.println("Current job id: " + job.id() + ", remaining time: " + job.timeLeft() + ", time: " + cpu.time);
     }
 
     public void testCase1(Processor cpu)
